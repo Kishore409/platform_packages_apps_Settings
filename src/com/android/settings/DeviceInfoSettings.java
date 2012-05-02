@@ -61,6 +61,7 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment {
     private static final String KEY_UPDATE_SETTING = "additional_system_update_settings";
     private static final String KEY_EQUIPMENT_ID = "fcc_equipment_id";
     private static final String PROPERTY_EQUIPMENT_ID = "ro.ril.fccid";
+    private static final String KEY_DEVICE_MANUFACTURER = "device_manufacturer";
 
     long[] mHits = new long[3];
 
@@ -78,6 +79,7 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment {
         setStringSummary(KEY_DEVICE_MODEL, Build.MODEL);
         setStringSummary(KEY_BUILD_NUMBER, Build.DISPLAY);
         findPreference(KEY_KERNEL_VERSION).setSummary(getFormattedKernelVersion());
+        setStringSummary(KEY_DEVICE_MANUFACTURER, Build.MANUFACTURER);
 
         // Remove Safety information preference if PROPERTY_URL_SAFETYLEGAL is not set
         removePreferenceIfPropertyMissing(getPreferenceScreen(), "safetylegal",
