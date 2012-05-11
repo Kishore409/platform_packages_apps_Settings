@@ -22,4 +22,15 @@
         android:key="battery_status"
         android:persistent="false"
     />
+
+    <PreferenceCategory android:key="battery_options"
+            android:title="@string/battery_options">
+
+        <CheckBoxPreference
+            android:key="poll_battery_level"
+            android:title="@string/poll_battery_level"
+            android:summary="@string/poll_battery_level_summary"/>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
