@@ -4128,4 +4128,13 @@
     <string name="cell_broadcast_settings">Cell broadcasts</string>
     <!-- Cell Broadcast settings description [CHAR LIMIT=100] -->
     <string name="cell_broadcast_settings_summary">Select the types of emergency alerts to display.</string>
+
+    <!-- Preference category for Battery options. -->
+    <string name="battery_options">Options</string>
+
+    <!-- Setting Checkbox title whether to poll battery level -->
+    <string name="poll_battery_level">Poll Battery Level</string>
+    <!-- setting Checkbox summary whether to poll battery level  -->
+    <string name="poll_battery_level_summary">Turn this on if battery level does not change. Requires reboot to take effect.</string>
+
 </resources>

@@ -32,11 +32,14 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
+import android.provider.Settings;
 import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
@@ -71,6 +74,8 @@ public class PowerUsageSummary extends PreferenceFragment implements Runnable {
 
     private static final String KEY_APP_LIST = "app_list";
     private static final String KEY_BATTERY_STATUS = "battery_status";
+    private static final String KEY_BATTERY_OPTIONS = "battery_options";
+    private static final String KEY_POLL_BATTERY_LEVEL = "poll_battery_level";
 
     private static final int MENU_STATS_TYPE = Menu.FIRST;
     private static final int MENU_STATS_REFRESH = Menu.FIRST + 1;
@@ -86,6 +91,8 @@ public class PowerUsageSummary extends PreferenceFragment implements Runnable {
 
     private PreferenceGroup mAppListGroup;
     private Preference mBatteryStatusPref;
+    private PreferenceCategory mBatteryOptionsGroup;
+    private CheckBoxPreference mPollBatteryLevelPref;
 
     private int mStatsType = BatteryStats.STATS_SINCE_CHARGED;
 
@@ -138,6 +145,12 @@ public class PowerUsageSummary extends PreferenceFragment implements Runnable {
         mBatteryStatusPref = mAppListGroup.findPreference(KEY_BATTERY_STATUS);
         mPowerProfile = new PowerProfile(getActivity());
         setHasOptionsMenu(true);
+
+        mBatteryOptionsGroup = (PreferenceCategory)
+                mAppListGroup.findPreference(KEY_BATTERY_OPTIONS);
+
+        mPollBatteryLevelPref = (CheckBoxPreference)
+                mAppListGroup.findPreference(KEY_POLL_BATTERY_LEVEL);
     }
 
     @Override
@@ -169,6 +182,12 @@ public class PowerUsageSummary extends PreferenceFragment implements Runnable {
 
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        if (preference == mPollBatteryLevelPref) {
+            Settings.Secure.putInt(getActivity().getContentResolver(),
+                    Settings.Secure.POLL_BATTERY_LEVEL,
+                    mPollBatteryLevelPref.isChecked() ? 1 : 0);
+            return true;
+        }
         if (preference instanceof BatteryHistoryPreference) {
             Parcel hist = Parcel.obtain();
             mStats.writeToParcelWithoutUids(hist, 0);
@@ -380,7 +399,12 @@ public class PowerUsageSummary extends PreferenceFragment implements Runnable {
         BatteryHistoryPreference hist = new BatteryHistoryPreference(getActivity(), mStats);
         hist.setOrder(-1);
         mAppListGroup.addPreference(hist);
+        mAppListGroup.addPreference(mBatteryOptionsGroup);
         
+        mPollBatteryLevelPref.setChecked(Settings.Secure.getInt(
+                getActivity().getContentResolver(),
+                Settings.Secure.POLL_BATTERY_LEVEL, 0) != 0);
+
         if (mPowerProfile.getAveragePower(PowerProfile.POWER_SCREEN_FULL) < 10) {
             addNotAvailableMessage();
             return;
