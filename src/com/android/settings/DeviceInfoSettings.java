@@ -201,10 +201,10 @@ public class DeviceInfoSettings extends SettingsPreferenceFragment {
                 "\\w+\\s+" + /* ignore: Linux */
                 "\\w+\\s+" + /* ignore: version */
                 "([^\\s]+)\\s+" + /* group 1: 2.6.22-omap1 */
-                "\\(([^\\s@]+(?:@[^\\s.]+)?)[^)]*\\)\\s+" + /* group 2: (xxxxxx@xxxxx.constant) */
-                "\\((?:[^(]*\\([^)]*\\))?[^)]*\\)\\s+" + /* ignore: (gcc ..) */
+                "\\(([^\\s@]+(?:@[^\\s.)]+)?)[^)]*\\)\\s+" + /* group 2: (xxxxxx@xxxxx.constant) */
+                "\\([^()]*(?:\\([^)]*\\)[^()]*)*\\)\\s+" + /* ignore: (gcc ..) */
                 "([^\\s]+)\\s+" + /* group 3: #26 */
-                "(?:PREEMPT\\s+)?" + /* ignore: PREEMPT (optional) */
+                "(?:(?:SMP\\s+)|(?:PREEMPT\\s+))?" + /* ignore: PREEMPT SMP (both optional) */
                 "(.+)"; /* group 4: date */
 
             Pattern p = Pattern.compile(PROC_VERSION_REGEX);
