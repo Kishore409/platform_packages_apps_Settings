@@ -33,6 +33,14 @@
             android:title="@string/accelerometer_title"/>
 
         <ListPreference
+                android:key="user_rotation"
+                android:title="@string/user_rotation_title"
+                android:summary="@string/user_rotation_summary"
+                android:persistent="true"
+                android:entries="@array/entries_user_rotation"
+                android:entryValues="@array/values_user_rotation" />
+
+        <ListPreference
                 android:key="screen_timeout"
                 android:title="@string/screen_timeout"
                 android:summary="@string/screen_timeout_summary"

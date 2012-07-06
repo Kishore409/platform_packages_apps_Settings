@@ -17,6 +17,7 @@
 package com.android.settings;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static android.provider.Settings.System.USER_ROTATION;
 
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
@@ -42,6 +43,8 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.android.internal.view.RotationPolicy;
 import com.android.settings.DreamSettings;
@@ -57,6 +60,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
     private static final String KEY_SCREEN_TIMEOUT = "screen_timeout";
     private static final String KEY_ACCELEROMETER = "accelerometer";
+    private static final String KEY_USER_ROTATION = "user_rotation";
     private static final String KEY_FONT_SIZE = "font_size";
     private static final String KEY_NOTIFICATION_PULSE = "notification_pulse";
     private static final String KEY_SCREEN_SAVER = "screensaver";
@@ -65,9 +69,11 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     private static final int DLG_GLOBAL_CHANGE_WARNING = 1;
 
     private DisplayManager mDisplayManager;
+    private WindowManager mWindowManager;
 
     private CheckBoxPreference mAccelerometer;
     private WarnedListPreference mFontSizePref;
+    private ListPreference mUserRotation;
     private CheckBoxPreference mNotificationPulse;
 
     private final Configuration mCurConfig = new Configuration();
@@ -82,7 +88,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
             new RotationPolicy.RotationPolicyListener() {
         @Override
         public void onChange() {
-            updateAccelerometerRotationCheckbox();
+            updateAccelerometerRotationCheckboxAndList();
         }
     };
 
@@ -95,9 +101,13 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
         mAccelerometer = (CheckBoxPreference) findPreference(KEY_ACCELEROMETER);
         mAccelerometer.setPersistent(false);
-        if (RotationPolicy.isRotationLockToggleSupported(getActivity())) {
+        if (RotationPolicy.isRotationLockToggleSupported(getActivity())
+                || !RotationPolicy.canDetectOrientation(getActivity())) {
             // If rotation lock is supported, then we do not provide this option in
             // Display settings.  However, is still available in Accessibility settings.
+            // If device can't detect its orientation, we don't give the user
+            // the option to use it.
+            mAccelerometer.setEnabled(false);
             getPreferenceScreen().removePreference(mAccelerometer);
         }
 
@@ -119,6 +129,24 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         mFontSizePref = (WarnedListPreference) findPreference(KEY_FONT_SIZE);
         mFontSizePref.setOnPreferenceChangeListener(this);
         mFontSizePref.setOnPreferenceClickListener(this);
+
+        mWindowManager = (WindowManager)getActivity().getSystemService(
+                Context.WINDOW_SERVICE);
+        mUserRotation = (ListPreference) findPreference(KEY_USER_ROTATION);
+        mUserRotation.setOnPreferenceChangeListener(this);
+        if (mWindowManager != null) {
+            Display mDisplay = mWindowManager.getDefaultDisplay();
+            if (mDisplay != null) {
+                mUserRotation.setValue(String.valueOf(mDisplay.getRotation()));
+            }
+        }
+        if (mUserRotation.getValue() == null) {
+            mUserRotation.setValue("0");
+        }
+        if (RotationPolicy.canDetectOrientation(getActivity())) {
+            getPreferenceScreen().removePreference(mUserRotation);
+        }
+
         mNotificationPulse = (CheckBoxPreference) findPreference(KEY_NOTIFICATION_PULSE);
         if (mNotificationPulse != null
                 && getResources().getBoolean(
@@ -281,7 +309,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     }
 
     private void updateState() {
-        updateAccelerometerRotationCheckbox();
+        updateAccelerometerRotationCheckboxAndList();
         readFontSizePreference(mFontSizePref);
         updateScreenSaverSummary();
         updateWifiDisplaySummary();
@@ -311,10 +339,16 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         }
     }
 
-    private void updateAccelerometerRotationCheckbox() {
+    private void updateAccelerometerRotationCheckboxAndList() {
         if (getActivity() == null) return;
 
         mAccelerometer.setChecked(!RotationPolicy.isRotationLocked(getActivity()));
+        if (mAccelerometer.isChecked() && (mWindowManager != null)) {
+            Display mDisplay = mWindowManager.getDefaultDisplay();
+            if (mDisplay != null) {
+                mUserRotation.setValue(String.valueOf(mDisplay.getRotation()));
+            }
+        }
     }
 
     public void writeFontSizePreference(Object objValue) {
@@ -329,8 +363,9 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference == mAccelerometer) {
-            RotationPolicy.setRotationLockForAccessibility(
-                    getActivity(), !mAccelerometer.isChecked());
+            RotationPolicy.setRotationLock(
+                    getActivity(), !mAccelerometer.isChecked(), -1);
+            mUserRotation.setValue("-1");
         } else if (preference == mNotificationPulse) {
             boolean value = mNotificationPulse.isChecked();
             Settings.System.putInt(getContentResolver(), Settings.System.NOTIFICATION_LIGHT_PULSE,
@@ -354,7 +389,14 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         if (KEY_FONT_SIZE.equals(key)) {
             writeFontSizePreference(objValue);
         }
-
+        if (KEY_USER_ROTATION.equals(key)) {
+            try {
+                int value = Integer.parseInt((String) objValue);
+                RotationPolicy.setRotationLock(getActivity(), true /*do lock*/, value);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "could not persist USER_ROTATION", e);
+            }
+        }
         return true;
     }
 
