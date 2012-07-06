@@ -1753,6 +1753,10 @@
     <string name="display_settings">Display</string>
     <!-- Sound & display settings screen, accelerometer-based rotation check box label -->
     <string name="accelerometer_title">Auto-rotate screen</string>
+    <!-- Sound & display settings screen, fixed orientation label -->
+    <string name="user_rotation_title">Screen Orientation</string>
+    <!-- Sound & display settings screen, fixed orientation summary -->
+    <string name="user_rotation_summary">Force screen to this rotation</string>
     <!-- Sound & display settings screen, accelerometer-based rotation summary text when check box is selected -->
     <string name="accelerometer_summary_on" product="tablet">Switch orientation automatically when rotating tablet</string>
     <!-- Sound & display settings screen, accelerometer-based rotation summary text when check box is selected -->
