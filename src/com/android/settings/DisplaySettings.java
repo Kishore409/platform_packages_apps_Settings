@@ -17,6 +17,7 @@
 package com.android.settings;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static android.provider.Settings.System.USER_ROTATION;
 
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
@@ -48,11 +49,13 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
     private static final String KEY_SCREEN_TIMEOUT = "screen_timeout";
     private static final String KEY_ACCELEROMETER = "accelerometer";
+    private static final String KEY_USER_ROTATION = "user_rotation";
     private static final String KEY_FONT_SIZE = "font_size";
     private static final String KEY_NOTIFICATION_PULSE = "notification_pulse";
     private static final String KEY_SCREEN_SAVER = "screensaver";
 
     private CheckBoxPreference mAccelerometer;
+    private ListPreference mUserRotation;
     private ListPreference mFontSizePref;
     private CheckBoxPreference mNotificationPulse;
 
@@ -101,6 +104,10 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
         mFontSizePref = (ListPreference) findPreference(KEY_FONT_SIZE);
         mFontSizePref.setOnPreferenceChangeListener(this);
+
+        mUserRotation = (ListPreference) findPreference(KEY_USER_ROTATION);
+        mUserRotation.setOnPreferenceChangeListener(this);
+
         mNotificationPulse = (CheckBoxPreference) findPreference(KEY_NOTIFICATION_PULSE);
         if (mNotificationPulse != null
                 && getResources().getBoolean(
@@ -256,7 +263,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference == mAccelerometer) {
-            RotationPolicy.setRotationLockForAccessibility(
+            RotationPolicy.setRotationLock(
                     getActivity(), !mAccelerometer.isChecked());
         } else if (preference == mNotificationPulse) {
             boolean value = mNotificationPulse.isChecked();
@@ -281,7 +288,17 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         if (KEY_FONT_SIZE.equals(key)) {
             writeFontSizePreference(objValue);
         }
-
+        if (KEY_USER_ROTATION.equals(key)) {
+            try {
+                int value = Integer.parseInt((String) objValue);
+                Settings.System.putInt(getContentResolver(), USER_ROTATION, value);
+                mAccelerometer.setChecked(false);
+                RotationPolicy.setRotationLock(
+                        getActivity(), !mAccelerometer.isChecked());
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "could not persist USER_ROTATION", e);
+            }
+        }
         return true;
     }
 }
