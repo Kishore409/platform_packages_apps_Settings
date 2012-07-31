@@ -290,11 +290,11 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         }
         if (KEY_USER_ROTATION.equals(key)) {
             try {
-                int value = Integer.parseInt((String) objValue);
-                Settings.System.putInt(getContentResolver(), USER_ROTATION, value);
                 mAccelerometer.setChecked(false);
                 RotationPolicy.setRotationLock(
                         getActivity(), !mAccelerometer.isChecked());
+                int value = Integer.parseInt((String) objValue);
+                Settings.System.putInt(getContentResolver(), USER_ROTATION, value);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "could not persist USER_ROTATION", e);
             }
