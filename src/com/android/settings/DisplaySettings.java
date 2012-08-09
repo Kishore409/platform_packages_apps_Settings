@@ -81,9 +81,13 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
         mAccelerometer = (CheckBoxPreference) findPreference(KEY_ACCELEROMETER);
         mAccelerometer.setPersistent(false);
-        if (RotationPolicy.isRotationLockToggleSupported(getActivity())) {
+        if (RotationPolicy.isRotationLockToggleSupported(getActivity())
+                || !RotationPolicy.canDetectOrientation(getActivity())) {
             // If rotation lock is supported, then we do not provide this option in
             // Display settings.  However, is still available in Accessibility settings.
+            // If device can't detect its orientation, we don't give the user
+            // the option to use it.
+            mAccelerometer.setEnabled(false);
             getPreferenceScreen().removePreference(mAccelerometer);
         }
 
@@ -107,6 +111,12 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
 
         mUserRotation = (ListPreference) findPreference(KEY_USER_ROTATION);
         mUserRotation.setOnPreferenceChangeListener(this);
+        if (mUserRotation.getValue() == null) {
+            mUserRotation.setValue("0");
+        }
+        if (RotationPolicy.canDetectOrientation(getActivity())) {
+            getPreferenceScreen().removePreference(mUserRotation);
+        }
 
         mNotificationPulse = (CheckBoxPreference) findPreference(KEY_NOTIFICATION_PULSE);
         if (mNotificationPulse != null
@@ -264,7 +274,8 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         if (preference == mAccelerometer) {
             RotationPolicy.setRotationLock(
-                    getActivity(), !mAccelerometer.isChecked());
+                    getActivity(), !mAccelerometer.isChecked(), -1);
+            mUserRotation.setValue("-1");
         } else if (preference == mNotificationPulse) {
             boolean value = mNotificationPulse.isChecked();
             Settings.System.putInt(getContentResolver(), Settings.System.NOTIFICATION_LIGHT_PULSE,
@@ -290,11 +301,8 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         }
         if (KEY_USER_ROTATION.equals(key)) {
             try {
-                mAccelerometer.setChecked(false);
-                RotationPolicy.setRotationLock(
-                        getActivity(), !mAccelerometer.isChecked());
                 int value = Integer.parseInt((String) objValue);
-                Settings.System.putInt(getContentResolver(), USER_ROTATION, value);
+                RotationPolicy.setRotationLock(getActivity(), true /*do lock*/, value);
             } catch (NumberFormatException e) {
                 Log.e(TAG, "could not persist USER_ROTATION", e);
             }
