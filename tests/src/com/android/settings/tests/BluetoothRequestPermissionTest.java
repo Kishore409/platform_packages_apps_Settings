@@ -32,8 +32,8 @@ import android.widget.Button;
 import android.widget.ListView;
 
 public class BluetoothRequestPermissionTest extends Activity {
-    private static final String TAG = "BluetoothRequestPermissionTest";
-    BluetoothAdapter mAdapter;
+    private static final String TAG = "BluetoothRequestPermissionTest AOSP_Tests";
+    private BluetoothAdapter mAdapter;
     private ArrayAdapter<String> mMsgAdapter;
 
     private class BtOnClickListener implements OnClickListener {
@@ -71,7 +71,8 @@ public class BluetoothRequestPermissionTest extends Activity {
         enable.setOnClickListener(new BtOnClickListener(true /* enable */));
 
         Button discoverable = (Button) findViewById(R.id.discoverable);
-        discoverable.setOnClickListener(new BtOnClickListener(false /* enable & discoverable */));
+        discoverable
+                .setOnClickListener(new BtOnClickListener(false /* enable & discoverable */));
 
         Button scanButton = (Button) findViewById(R.id.scan);
         scanButton.setOnClickListener(new BtScanOnClickListener());
@@ -81,7 +82,8 @@ public class BluetoothRequestPermissionTest extends Activity {
             scanButton.setText(R.string.start_scan);
         }
 
-        mMsgAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        mMsgAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1);
 
         ListView listView = (ListView) findViewById(R.id.msg_container);
         listView.setAdapter(mMsgAdapter);
@@ -111,7 +113,8 @@ public class BluetoothRequestPermissionTest extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode != 1) {
-            Log.e(TAG, "Unexpected onActivityResult " + requestCode + " " + resultCode);
+            Log.e(TAG, "Unexpected onActivityResult " + requestCode + " "
+                    + resultCode);
             return;
         }
 
@@ -143,19 +146,20 @@ public class BluetoothRequestPermissionTest extends Activity {
             String action = intent.getAction();
             if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
                 String stateStr = "???";
-                switch (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothDevice.ERROR)) {
-                    case BluetoothAdapter.STATE_OFF:
-                        stateStr = "off";
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        stateStr = "turning on";
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        stateStr = "on";
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        stateStr = "turning off";
-                        break;
+                switch (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                        BluetoothDevice.ERROR)) {
+                case BluetoothAdapter.STATE_OFF:
+                    stateStr = "off";
+                    break;
+                case BluetoothAdapter.STATE_TURNING_ON:
+                    stateStr = "turning on";
+                    break;
+                case BluetoothAdapter.STATE_ON:
+                    stateStr = "on";
+                    break;
+                case BluetoothAdapter.STATE_TURNING_OFF:
+                    stateStr = "turning off";
+                    break;
                 }
                 addMsg("Bluetooth status = " + stateStr);
             } else if (action.equals(BluetoothDevice.ACTION_FOUND)) {
@@ -163,7 +167,8 @@ public class BluetoothRequestPermissionTest extends Activity {
                 addMsg("Found: " + name);
             } else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED)) {
                 addMsg("Scan started...");
-            } else if (action.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
+            } else if (action
+                    .equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
                 addMsg("Scan ended");
             }
         }

@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class SettingsLaunchPerformance extends LaunchPerformanceBase {
 
-    public static final String LOG_TAG = "SettingsLaunchPerformance";
+    public static final String LOG_TAG = "SettingsLaunchPerformance AOSP_Tests";
 
     public SettingsLaunchPerformance() {
         super();
