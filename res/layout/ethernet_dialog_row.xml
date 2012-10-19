@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
      limitations under the License.
 -->
 
-<resources>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              style="@style/ethernet_item" >
+    <TextView
+            style="@style/ethernet_item_label"
+            android:id="@+id/name" />
 
-    <style name="Theme.WifiDialog" parent="@*android:style/Theme.Holo.Dialog.Alert">
-        <item name="android:windowSoftInputMode">adjustResize</item>
-    </style>
-    <style name="Theme.EthernetDialog" parent="@*android:style/Theme.Holo.Dialog.Alert">
-        <item name="android:windowSoftInputMode">adjustResize</item>
-    </style>
-</resources>
+    <TextView
+            android:id="@+id/value"
+            style="@style/ethernet_item_content"
+            android:textStyle="bold" />
+</LinearLayout>
