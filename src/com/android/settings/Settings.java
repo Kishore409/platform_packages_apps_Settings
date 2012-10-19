@@ -25,6 +25,7 @@ import com.android.settings.applications.InstalledAppDetails;
 import com.android.settings.applications.ManageApplications;
 import com.android.settings.bluetooth.BluetoothEnabler;
 import com.android.settings.deviceinfo.Memory;
+import com.android.settings.ethernet.EthernetEnabler;
 import com.android.settings.fuelgauge.PowerUsageSummary;
 import com.android.settings.vpn2.VpnSettings;
 import com.android.settings.wifi.WifiEnabler;
@@ -105,6 +106,7 @@ public class Settings extends PreferenceActivity
             R.id.data_usage_settings,
             R.id.wireless_settings,
             R.id.device_section,
+            R.id.ethernet_settings,
             R.id.sound_settings,
             R.id.display_settings,
             R.id.storage_settings,
@@ -438,6 +440,11 @@ public class Settings extends PreferenceActivity
                 if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
                     target.remove(i);
                 }
+            } else if (id == R.id.ethernet_settings) {
+                //Remove Ethernet Settings if Ethernet service is not available.
+                if (getSystemService(Context.ETHERNET_SERVICE) == null) {
+                    target.remove(header);
+                }
             } else if (id == R.id.data_usage_settings) {
                 // Remove data usage when kernel module not enabled
                 final INetworkManagementService netManager = INetworkManagementService.Stub
@@ -585,6 +592,7 @@ public class Settings extends PreferenceActivity
 
         private final WifiEnabler mWifiEnabler;
         private final BluetoothEnabler mBluetoothEnabler;
+        private final EthernetEnabler mEthernetEnabler;
         private AuthenticatorHelper mAuthHelper;
 
         private static class HeaderViewHolder {
@@ -599,7 +607,9 @@ public class Settings extends PreferenceActivity
         static int getHeaderType(Header header) {
             if (header.fragment == null && header.intent == null) {
                 return HEADER_TYPE_CATEGORY;
-            } else if (header.id == R.id.wifi_settings || header.id == R.id.bluetooth_settings) {
+            } else if (header.id == R.id.wifi_settings ||
+                    header.id == R.id.bluetooth_settings ||
+                    header.id == R.id.ethernet_settings) {
                 return HEADER_TYPE_SWITCH;
             } else {
                 return HEADER_TYPE_NORMAL;
@@ -643,6 +653,7 @@ public class Settings extends PreferenceActivity
             // Switches inflated from their layouts. Must be done before adapter is set in super
             mWifiEnabler = new WifiEnabler(context, new Switch(context));
             mBluetoothEnabler = new BluetoothEnabler(context, new Switch(context));
+            mEthernetEnabler = new EthernetEnabler(context, new Switch(context));
         }
 
         @Override
@@ -699,8 +710,10 @@ public class Settings extends PreferenceActivity
                     // Would need a different treatment if the main menu had more switches
                     if (header.id == R.id.wifi_settings) {
                         mWifiEnabler.setSwitch(holder.switch_);
-                    } else {
+                    } else if(header.id == R.id.bluetooth_settings) {
                         mBluetoothEnabler.setSwitch(holder.switch_);
+                    } else if (header.id == R.id.ethernet_settings) {
+                        mEthernetEnabler.setSwitch(holder.switch_);
                     }
                     // No break, fall through on purpose to update common fields
 
@@ -737,11 +750,13 @@ public class Settings extends PreferenceActivity
         public void resume() {
             mWifiEnabler.resume();
             mBluetoothEnabler.resume();
+            mEthernetEnabler.resume();
         }
 
         public void pause() {
             mWifiEnabler.pause();
             mBluetoothEnabler.pause();
+            mEthernetEnabler.pause();
         }
     }
 
