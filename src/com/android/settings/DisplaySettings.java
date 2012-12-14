@@ -43,6 +43,8 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import com.android.internal.view.RotationPolicy;
 import com.android.settings.DreamSettings;
@@ -67,6 +69,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     private static final int DLG_GLOBAL_CHANGE_WARNING = 1;
 
     private DisplayManager mDisplayManager;
+    private WindowManager mWindowManager;
 
     private CheckBoxPreference mAccelerometer;
     private WarnedListPreference mFontSizePref;
@@ -85,7 +88,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
             new RotationPolicy.RotationPolicyListener() {
         @Override
         public void onChange() {
-            updateAccelerometerRotationCheckbox();
+            updateAccelerometerRotationCheckboxAndList();
         }
     };
 
@@ -127,8 +130,16 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         mFontSizePref.setOnPreferenceChangeListener(this);
         mFontSizePref.setOnPreferenceClickListener(this);
 
+        mWindowManager = (WindowManager)getActivity().getSystemService(
+                Context.WINDOW_SERVICE);
         mUserRotation = (ListPreference) findPreference(KEY_USER_ROTATION);
         mUserRotation.setOnPreferenceChangeListener(this);
+        if (mWindowManager != null) {
+            Display mDisplay = mWindowManager.getDefaultDisplay();
+            if (mDisplay != null) {
+                mUserRotation.setValue(String.valueOf(mDisplay.getRotation()));
+            }
+        }
         if (mUserRotation.getValue() == null) {
             mUserRotation.setValue("0");
         }
@@ -298,7 +309,7 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
     }
 
     private void updateState() {
-        updateAccelerometerRotationCheckbox();
+        updateAccelerometerRotationCheckboxAndList();
         readFontSizePreference(mFontSizePref);
         updateScreenSaverSummary();
         updateWifiDisplaySummary();
@@ -328,10 +339,16 @@ public class DisplaySettings extends SettingsPreferenceFragment implements
         }
     }
 
-    private void updateAccelerometerRotationCheckbox() {
+    private void updateAccelerometerRotationCheckboxAndList() {
         if (getActivity() == null) return;
 
         mAccelerometer.setChecked(!RotationPolicy.isRotationLocked(getActivity()));
+        if (mAccelerometer.isChecked() && (mWindowManager != null)) {
+            Display mDisplay = mWindowManager.getDefaultDisplay();
+            if (mDisplay != null) {
+                mUserRotation.setValue(String.valueOf(mDisplay.getRotation()));
+            }
+        }
     }
 
     public void writeFontSizePreference(Object objValue) {
