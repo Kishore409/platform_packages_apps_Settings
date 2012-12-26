@@ -201,15 +201,10 @@ public class StorageVolumePreferenceCategory extends PreferenceCategory {
             addPreference(mMountTogglePreference);
         }
 
-        // Only allow formatting of primary physical storage
-        // TODO: enable for non-primary volumes once MTP is fixed
-        final boolean allowFormat = mVolume != null ? mVolume.isPrimary() : false;
-        if (allowFormat) {
-            mFormatPreference = new Preference(context);
-            mFormatPreference.setTitle(R.string.sd_format);
-            mFormatPreference.setSummary(R.string.sd_format_summary);
-            addPreference(mFormatPreference);
-        }
+        mFormatPreference = new Preference(context);
+        mFormatPreference.setTitle(R.string.sd_format);
+        mFormatPreference.setSummary(R.string.sd_format_summary);
+        addPreference(mFormatPreference);
 
         final IPackageManager pm = ActivityThread.getPackageManager();
         try {
