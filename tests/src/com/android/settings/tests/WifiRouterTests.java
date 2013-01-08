@@ -66,7 +66,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import android.provider.Settings.System;
 import com.android.settings.tests.TestConfigurationManager;
-import java.io.*;
 
 /**
  * Tests for the Settings operator/manufacturer hook.
@@ -84,6 +83,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
     private static final int WAIT_FOR_WIFI_OPERATION = 1000;
     private static final int WAIT_FOR_WIFI_MENU = 2000;
     private static final int WAIT_FOR_AP_ADD = 3000;
+    private static final int WAIT_FOR_WIFI_FIRST_TIME_ENABLE = 4000;
     private static final int WAIT_FOR_HTTP_CHECK = 10000;
     private static final int WAIT_FOR_WIFI_AP_SCAN = 20000;
     private static final int WIFI_CONNECT_RETRIES = 7;
@@ -129,7 +129,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
                 .getContext());
     }
 
-    public void enableWifi() {
+    public void enableWifi() throws InterruptedException {
         assertTrue(
                 "Wi-Fi is in an unknown state. This state will occur when an error happens while enabling or disabling ",
                 (mWifiManager.getWifiState() != WifiManager.WIFI_STATE_UNKNOWN));
@@ -138,6 +138,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
             Log.v(TAG, "WiFi state : " + mWifiManager.getWifiState());
         } else {
             mWifiManager.setWifiEnabled(true);
+            Thread.sleep(WAIT_FOR_WIFI_FIRST_TIME_ENABLE);
             Log.v(TAG, "WiFi enabled : " + mWifiManager.getWifiState());
             assertTrue("Wi-Fi enabled : ",
                     (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED));
@@ -236,7 +237,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         Thread.sleep(WAIT_FOR_WIFI_OPERATION);
 
         if (wifiApSecurity.equals(sNull) == false) {
-            mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
+            mInst.sendCharacterSync(KeyEvent.KEYCODE_TAB);
             Thread.sleep(WAIT_FOR_WIFI_OPERATION);
             mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
             Thread.sleep(WAIT_FOR_WIFI_OPERATION);
@@ -247,10 +248,10 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
                 mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
                 Thread.sleep(WAIT_FOR_WIFI_OPERATION);
                 // enter password
-                mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
+                mInst.sendCharacterSync(KeyEvent.KEYCODE_TAB);
                 mInst.sendStringSync(wifiApPass);
                 Thread.sleep(WAIT_FOR_WIFI_OPERATION);
-                mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
+                mInst.sendCharacterSync(KeyEvent.KEYCODE_TAB);
             }
 
             if (wifiApSecurity.toLowerCase().equals(WPA) == true) {
@@ -260,14 +261,14 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
                 mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
                 Thread.sleep(WAIT_FOR_WIFI_OPERATION);
                 // enter password
-                mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
+                mInst.sendCharacterSync(KeyEvent.KEYCODE_TAB);
                 mInst.sendStringSync(wifiApPass);
                 Thread.sleep(WAIT_FOR_WIFI_OPERATION);
-                mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
+                mInst.sendCharacterSync(KeyEvent.KEYCODE_TAB);
             }
         } else {
             Log.v(TAG, "Wifi AP has no security enabled : " + wifiApSecurity);
-            mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_DOWN);
+            mInst.sendCharacterSync(KeyEvent.KEYCODE_TAB);
             Thread.sleep(WAIT_FOR_WIFI_OPERATION);
 
         }
