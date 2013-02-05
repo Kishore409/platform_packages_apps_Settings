@@ -103,9 +103,11 @@ public class Wifi_Settings_Tests extends
 
         Intent mIntent = new Intent();
 
-        // Reads the Access Points from FileName. You can add the file manually to
+        // Reads the Access Points from FileName. You can add the file manually
+        // to
         // /data/data/com.android.browser/files
-        // or use the test_write() method. In the file you should add your AP's name one on each
+        // or use the test_write() method. In the file you should add your AP's
+        // name one on each
         // line.
         readAP();
     }
@@ -140,9 +142,11 @@ public class Wifi_Settings_Tests extends
 
     // only for debug purpose
     /*
-     * public void test_write() throws Exception{ Log.v(TAG, "Writing..."); writeAP(); }
+     * public void test_write() throws Exception{ Log.v(TAG, "Writing...");
+     * writeAP(); }
      * 
-     * public void test_read() throws Exception { Log.v(TAG, "Reading..."); readAP(); }
+     * public void test_read() throws Exception { Log.v(TAG, "Reading...");
+     * readAP(); }
      */
 
     public void checkWifiOff() throws Exception {
@@ -267,6 +271,8 @@ public class Wifi_Settings_Tests extends
         // Verify that WIFI_AP_NAME is found by scan action - other way throw
         // error - as this is going to be the open wifi to whom we try to
         // connect
+
+        assertTrue("Can't start scan ", mWifiManager.startScan());
         List<ScanResult> list1 = mWifiManager.getScanResults();
         Log.v(TAG, "Total number of Wi-Fi found by scan is " + list1.size());
         assertTrue("Wi-Fi SCAN action returned no result which is wrong ",
@@ -677,23 +683,11 @@ public class Wifi_Settings_Tests extends
         Thread.sleep(1000);
         mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
         Thread.sleep(8000);
-        mWifiManager = (WifiManager) mContext
-                .getSystemService(Context.WIFI_SERVICE);
-        mWifiManager.setWifiEnabled(false);
-        Thread.sleep(5000);
-        mWifiManager = (WifiManager) mContext
-                .getSystemService(Context.WIFI_SERVICE);
-        mWifiManager.setWifiEnabled(true);
-        Thread.sleep(20000);
 
-        mWifiManager = (WifiManager) mContext
-                .getSystemService(Context.WIFI_SERVICE);
-        mWifiManager.setWifiEnabled(false);
-        Thread.sleep(5000);
-        mWifiManager = (WifiManager) mContext
-                .getSystemService(Context.WIFI_SERVICE);
-        mWifiManager.setWifiEnabled(true);
-        Thread.sleep(20000);
+        Disable_Wifi();
+        Enable_Wifi();
+
+        add_Network(WIFI_AP_NAME);
 
         // Read new Ip from Wifi Configuration to see that it was set
         mWifiInfo = null;
@@ -725,22 +719,7 @@ public class Wifi_Settings_Tests extends
         assertEquals("HTTP test failed which is wrong", "Pass",
                 mHttpClientTestResult);
 
-        // reset configuration
-        mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
-        Thread.sleep(1000);
-        mInst.sendCharacterSync(KeyEvent.KEYCODE_DPAD_RIGHT);
-        Thread.sleep(5000);
-
-        // select Show advanced opions
-        mInst.sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_DPAD_CENTER));
-        Thread.sleep(ViewConfiguration.get(mContext).getLongPressTimeout());
-        Thread.sleep(2000);
-        mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
-        Thread.sleep(5000);
-
-        mInst.sendCharacterSync(KeyEvent.KEYCODE_ENTER);
-        Thread.sleep(8000);
+        clean_ConfiguredNetworks_IF_Available();
 
         Log.v(TAG, "Instrumentation test stoped test_Static_IP_Allocation");
     }
