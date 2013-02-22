@@ -66,6 +66,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import android.provider.Settings.System;
 import com.android.settings.tests.TestConfigurationManager;
+import java.io.IOException;
 
 /**
  * Tests for the Settings operator/manufacturer hook.
@@ -80,6 +81,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
     private static final int MENU_ID_ADD_NETWORK = Menu.FIRST + 3;
     private static final int MENU_ID_SCAN = Menu.FIRST + 5;
+    private static final int WAIT_FOR_KEYCODE = 500;
     private static final int WAIT_FOR_WIFI_OPERATION = 1000;
     private static final int WAIT_FOR_WIFI_MENU = 2000;
     private static final int WAIT_FOR_AP_ADD = 3000;
@@ -112,7 +114,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
     public WifiRouterTests() {
         super(Settings.class);
-
+        Log.v(TAG, "Constructor called");
     }
 
     @Override
@@ -127,6 +129,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         Intent mIntent = new Intent();
         mTestConfigurationManager = new TestConfigurationManager(getInstrumentation()
                 .getContext());
+        Log.v(TAG, "setUp completed");
     }
 
     public void enableWifi() throws InterruptedException {
@@ -151,13 +154,15 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
         if (networksList != null) {
             for (int i = 0; i < networksList.size(); i++) {
-                Log.v(TAG,
-                        "wifi number : " + i + " with network name SSID : "
-                                + networksList.get(i).SSID + " netId : " + networksList.get(i).networkId);
-                // Remove the specified network from the networksList of configured
-                // networks
-                boolean isDeleted = mWifiManager.removeNetwork(networksList.get(i).networkId);
-                Log.v(TAG, " " + networksList.get(i).SSID + " -> Wifi was deleted : " + isDeleted);
+                Log.v(TAG, "wifi number : " + i + " with network name SSID : "
+                        + networksList.get(i).SSID + " netId : "
+                        + networksList.get(i).networkId);
+                // Remove the specified network from the networksList of
+                // configured networks
+                boolean isDeleted = mWifiManager
+                        .removeNetwork(networksList.get(i).networkId);
+                Log.v(TAG, " " + networksList.get(i).SSID + " -> Wifi was deleted : "
+                        + isDeleted);
                 Thread.sleep(WAIT_FOR_WIFI_OPERATION);
             }
         }
@@ -179,6 +184,33 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         }
     }
 
+    private void simpleLayoutWifiScan() throws InterruptedException {
+        Log.v(TAG, "simpleLayoutWifiScan");
+        Thread.sleep(WAIT_FOR_KEYCODE);
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_ENTER);
+        Thread.sleep(WAIT_FOR_KEYCODE);
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_MENU);
+        Thread.sleep(WAIT_FOR_KEYCODE);
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_ENTER);
+    }
+
+    private boolean sameView(View firstView, View secondView) {
+        return firstView != null && secondView != null && firstView == secondView;
+    }
+
+    private void simpleLayoutAddWifiNetworkInvoke(int apsNumber)
+            throws InterruptedException {
+        Log.v(TAG, "simpleLayoutAddWifiNetworkInvoke");
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+        for (int i = 0; i < apsNumber; i++) {
+            Thread.sleep(WAIT_FOR_KEYCODE);
+            mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+        }
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN);
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT);
+        mActivity.getWindow().getCurrentFocus().performClick();
+    }
+
     public void connectToWiFi(Properties wifiProps) throws IOException,
             InterruptedException {
         Log.v(TAG, "Instrumentation test start");
@@ -192,8 +224,12 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
         // enable wifi before scan
         enableWifi();
-        boolean menuTriggered = mInst.invokeMenuActionSync(mActivity, MENU_ID_SCAN, 0);
-        assertTrue("Wifi SCAN menu was not triggered", menuTriggered);
+        boolean menuTriggered = false;
+        menuTriggered = mInst.invokeMenuActionSync(mActivity, MENU_ID_SCAN, 0);
+        if (!menuTriggered) {
+            // if the preceding API invokation failed, try again in another way
+            simpleLayoutWifiScan();
+        }
 
         // wait until wifi SCAN action ends
         Thread.sleep(WAIT_FOR_WIFI_AP_SCAN);
@@ -207,7 +243,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         List<ScanResult> apnetworksList = mWifiManager.getScanResults();
         Log.v(TAG, "total number of wifi aps found by scan : " + apnetworksList.size());
         assertTrue("Wifi SCAN action returned no result ", (apnetworksList.size() > 0));
-
+        int nrOfAPs = 0;
         if (apnetworksList != null) {
             boolean found = false;
             for (int i = 0; i < apnetworksList.size(); i++) {
@@ -221,6 +257,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
                     found = true;
                 }
             }
+            nrOfAPs = apnetworksList.size();
             Log.v(TAG, "found = " + found);
             assertTrue(
                     "WIFI_AP_NAME was not found by SCAN which means we will not be able to connect to it",
@@ -229,10 +266,16 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
         // ADD Network WIFI_AP_NAME to the configured AP
         menuTriggered = mInst.invokeMenuActionSync(mActivity, MENU_ID_ADD_NETWORK, 0);
-        assertTrue("Wifi ADD NETWORK menu was not triggered", menuTriggered);
+        if (!menuTriggered) {
+            // if the preceding API invokation failed, try again in another way
+            simpleLayoutAddWifiNetworkInvoke(nrOfAPs);
+        }
+
         Thread.sleep(WAIT_FOR_WIFI_MENU);
 
         // Enter WiFI AP Name
+        mInst.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER);
+        Thread.sleep(WAIT_FOR_KEYCODE);
         mInst.sendStringSync(wifiApNamne);
         Thread.sleep(WAIT_FOR_WIFI_OPERATION);
 
@@ -289,7 +332,8 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
                 + networksList.get(0).SSID);
         assertTrue(
                 "Numer of configured Wifi is not 1 and  SSID is not equal with WIFI name added==",
-                ((networksList.size() == 1) && (networksList.get(0).SSID.indexOf(wifiApNamne) > 0)));
+                ((networksList.size() == 1) && (networksList.get(0).SSID
+                        .indexOf(wifiApNamne) > 0)));
 
         // Because this is the only configured network, device should
         // automaticaly connect to it
@@ -316,7 +360,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
         }
 
-        // try to connect to the http  configuration page of the router
+        // try to connect to the http configuration page of the router
         // with 10s delay
         Log.v(TAG, "HTTP check page = " + wifiTestPage);
         httpClientTest(wifiTestPage);
@@ -345,8 +389,10 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
     }
 
     public void testConnectToWifi() throws IOException, InterruptedException {
+        Log.v(TAG, "starting connection test");
         Properties wifiProps = mTestConfigurationManager.getProperties(CONFIG_DIR_PATH);
         assertNotNull(TAG + " could not load config properties", wifiProps);
+        Log.v(TAG, "Wifi Properties loaded");
         connectToWiFi(wifiProps);
     }
 
