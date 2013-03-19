@@ -15,3 +15,6 @@ LOCAL_PACKAGE_NAME := SettingsTests
 LOCAL_INSTRUMENTATION_FOR := Settings
 
 include $(BUILD_PACKAGE)
+
+# Bundle into ATF package
+ATF_TEST_PACKAGES += SettingsTests
