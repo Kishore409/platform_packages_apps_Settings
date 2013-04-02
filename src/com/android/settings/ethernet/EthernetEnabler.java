@@ -39,7 +39,7 @@ public class EthernetEnabler implements CompoundButton.OnCheckedChangeListener {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(EthernetManager.NETWORK_STATE_CHANGED_ACTION)) {
+            if (intent.getAction().equals(EthernetManager.INTERFACE_STATE_CHANGED_ACTION)) {
                 EthernetInfo ei = (EthernetInfo) intent.getParcelableExtra(
                         EthernetManager.EXTRA_ETHERNET_INFO);
                 NetworkInfo ni = ei.getNetworkInfo();
@@ -87,7 +87,7 @@ public class EthernetEnabler implements CompoundButton.OnCheckedChangeListener {
         mSwitch = switch_;
 
         mEthernetManager = (EthernetManager) context.getSystemService(Context.ETHERNET_SERVICE);
-        mIntentFilter = new IntentFilter(EthernetManager.NETWORK_STATE_CHANGED_ACTION);
+        mIntentFilter = new IntentFilter(EthernetManager.INTERFACE_STATE_CHANGED_ACTION);
     }
 
     @Override
