@@ -89,6 +89,7 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
     private static final int WAIT_FOR_HTTP_CHECK = 10000;
     private static final int WAIT_FOR_WIFI_AP_SCAN = 20000;
     private static final int WIFI_CONNECT_RETRIES = 7;
+    private static final int WIFI_ENABLE_TIMEOUT = 60;
     private static final int HTTP_CONNECT_RETRIES = 7;
     private static final int HTTP_SUCCESSFUL_RESPONSE_STATUS = 200;
     private static final String TAG = "WifiRouterTests";
@@ -123,12 +124,13 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         mActivity = getActivity();
         mInst = getInstrumentation();
         mContext = mInst.getTargetContext();
-        mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        mWifiManager = (WifiManager) mContext
+                .getSystemService(Context.WIFI_SERVICE);
         mWifiP2pManager = (WifiP2pManager) mContext
                 .getSystemService(Context.WIFI_P2P_SERVICE);
         Intent mIntent = new Intent();
-        mTestConfigurationManager = new TestConfigurationManager(getInstrumentation()
-                .getContext());
+        mTestConfigurationManager = new TestConfigurationManager(
+                getInstrumentation().getContext());
         Log.v(TAG, "setUp completed");
     }
 
@@ -143,26 +145,31 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
             mWifiManager.setWifiEnabled(true);
             Thread.sleep(WAIT_FOR_WIFI_FIRST_TIME_ENABLE);
             Log.v(TAG, "WiFi enabled : " + mWifiManager.getWifiState());
-            assertTrue("Wi-Fi enabled : ",
+            assertTrue(
+                    "Wi-Fi enabled : ",
                     (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED));
         }
     }
 
-    private void cleanConfiguredNetworksIfAvailable() throws InterruptedException {
-        List<WifiConfiguration> networksList = mWifiManager.getConfiguredNetworks();
-        Log.v(TAG, "total number of configured wifi is :  " + networksList.size());
+    private void cleanConfiguredNetworksIfAvailable()
+            throws InterruptedException {
+        List<WifiConfiguration> networksList = mWifiManager
+                .getConfiguredNetworks();
+        Log.v(TAG,
+                "total number of configured wifi is :  " + networksList.size());
 
         if (networksList != null) {
             for (int i = 0; i < networksList.size(); i++) {
-                Log.v(TAG, "wifi number : " + i + " with network name SSID : "
-                        + networksList.get(i).SSID + " netId : "
-                        + networksList.get(i).networkId);
+                Log.v(TAG,
+                        "wifi number : " + i + " with network name SSID : "
+                                + networksList.get(i).SSID + " netId : "
+                                + networksList.get(i).networkId);
                 // Remove the specified network from the networksList of
                 // configured networks
-                boolean isDeleted = mWifiManager
-                        .removeNetwork(networksList.get(i).networkId);
-                Log.v(TAG, " " + networksList.get(i).SSID + " -> Wifi was deleted : "
-                        + isDeleted);
+                boolean isDeleted = mWifiManager.removeNetwork(networksList
+                        .get(i).networkId);
+                Log.v(TAG, " " + networksList.get(i).SSID
+                        + " -> Wifi was deleted : " + isDeleted);
                 Thread.sleep(WAIT_FOR_WIFI_OPERATION);
             }
         }
@@ -176,7 +183,8 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
             if (response.getStatusLine().getStatusCode() == HTTP_SUCCESSFUL_RESPONSE_STATUS) {
                 mHttpClientTestResult = HTTP_PASS_STATUS;
             } else {
-                mHttpClientTestResult = "Fail: Code: " + String.valueOf(response);
+                mHttpClientTestResult = "Fail: Code: "
+                        + String.valueOf(response);
             }
             request.abort();
         } catch (IOException e) {
@@ -195,7 +203,8 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
     }
 
     private boolean sameView(View firstView, View secondView) {
-        return firstView != null && secondView != null && firstView == secondView;
+        return firstView != null && secondView != null
+                && firstView == secondView;
     }
 
     private void simpleLayoutAddWifiNetworkInvoke(int apsNumber)
@@ -241,15 +250,18 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         // error - as this is going to be the open wifi to which we try to
         // connect
         List<ScanResult> apnetworksList = mWifiManager.getScanResults();
-        Log.v(TAG, "total number of wifi aps found by scan : " + apnetworksList.size());
-        assertTrue("Wifi SCAN action returned no result ", (apnetworksList.size() > 0));
+        Log.v(TAG,
+                "total number of wifi aps found by scan : "
+                        + apnetworksList.size());
+        assertTrue("Wifi SCAN action returned no result ",
+                (apnetworksList.size() > 0));
         int nrOfAPs = 0;
         if (apnetworksList != null) {
             boolean found = false;
             for (int i = 0; i < apnetworksList.size(); i++) {
                 ScanResult scanResult = apnetworksList.get(i);
-                Log.v(TAG, "wifi ap number : " + i + " with network name SSID : "
-                        + scanResult.SSID);
+                Log.v(TAG, "wifi ap number : " + i
+                        + " with network name SSID : " + scanResult.SSID);
                 String comp = scanResult.SSID;
                 Log.v(TAG, "comp = " + comp + " wifiApName = " + wifiApNamne);
                 if (comp.equals(wifiApNamne)) {
@@ -265,7 +277,8 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         }
 
         // ADD Network WIFI_AP_NAME to the configured AP
-        menuTriggered = mInst.invokeMenuActionSync(mActivity, MENU_ID_ADD_NETWORK, 0);
+        menuTriggered = mInst.invokeMenuActionSync(mActivity,
+                MENU_ID_ADD_NETWORK, 0);
         if (!menuTriggered) {
             // if the preceding API invokation failed, try again in another way
             simpleLayoutAddWifiNetworkInvoke(nrOfAPs);
@@ -325,11 +338,12 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
         // Check that WIFI_AP_NAME was added to configured networks - throw
         // error if not
-        List<WifiConfiguration> networksList = mWifiManager.getConfiguredNetworks();
+        List<WifiConfiguration> networksList = mWifiManager
+                .getConfiguredNetworks();
         Log.v(TAG, "Asserting that there is at least one configured Network");
         assertNotNull("There are no configured networks", networksList);
-        Log.v(TAG, "Configured wifi Number : " + networksList.size() + " SSID : "
-                + networksList.get(0).SSID);
+        Log.v(TAG, "Configured wifi Number : " + networksList.size()
+                + " SSID : " + networksList.get(0).SSID);
         assertTrue(
                 "Numer of configured Wifi is not 1 and  SSID is not equal with WIFI name added==",
                 ((networksList.size() == 1) && (networksList.get(0).SSID
@@ -346,16 +360,18 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         mWifiInfo = mWifiManager.getConnectionInfo();
 
         int retries = 1;
-        while (mWifiInfo.getDetailedStateOf(mWifiInfo.getSupplicantState()).toString() != OBTAINING_IP) {
+        while (mWifiInfo.getDetailedStateOf(mWifiInfo.getSupplicantState())
+                .toString() != OBTAINING_IP) {
             if (retries == WIFI_CONNECT_RETRIES) {
                 break;
             }
             mWifiInfo = mWifiManager.getConnectionInfo();
             Thread.sleep(WAIT_FOR_WIFI_OPERATION);
             Log.v(TAG,
-                    "waiting until ip is retrieved : "
-                            + mWifiInfo.getDetailedStateOf(mWifiInfo.getSupplicantState())
-                            + " retries : " + retries);
+                    "waiting until mIp is retrieved : "
+                            + mWifiInfo.getDetailedStateOf(mWifiInfo
+                                    .getSupplicantState()) + " retries : "
+                            + retries);
             retries++;
 
         }
@@ -366,8 +382,9 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         httpClientTest(wifiTestPage);
         retries = 1;
         while (retries != HTTP_CONNECT_RETRIES) {
-            Log.v(TAG, "mHttpClientTestResult : " + mHttpClientTestResult + " retries : "
-                    + retries);
+
+            Log.v(TAG, "mHttpClientTestResult : " + mHttpClientTestResult
+                    + " retries : " + retries);
             if (mHttpClientTestResult == HTTP_PASS_STATUS) {
                 break;
             }
@@ -377,7 +394,8 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         }
 
         Log.v(TAG, "mHttpClientTestResult= " + mHttpClientTestResult);
-        assertEquals("HTTP test failed ", HTTP_PASS_STATUS, mHttpClientTestResult);
+        assertEquals("HTTP test failed ", HTTP_PASS_STATUS,
+                mHttpClientTestResult);
 
         // networksList Wifi Info
         mWifiInfo = mWifiManager.getConnectionInfo();
@@ -390,10 +408,72 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
 
     public void testConnectToWifi() throws IOException, InterruptedException {
         Log.v(TAG, "starting connection test");
-        Properties wifiProps = mTestConfigurationManager.getProperties(CONFIG_DIR_PATH);
+        Properties wifiProps = mTestConfigurationManager
+                .getProperties(CONFIG_DIR_PATH);
         assertNotNull(TAG + " could not load config properties", wifiProps);
         Log.v(TAG, "Wifi Properties loaded");
         connectToWiFi(wifiProps);
     }
 
+    public void testIpClassesA() throws InterruptedException {
+        getIpAdress("1", SettingsInstrumentationRunner.apName);
+    }
+
+    public void testIpClassesB() throws InterruptedException {
+        getIpAdress("128", SettingsInstrumentationRunner.apName);
+    }
+
+    public void testIpClassesC() throws InterruptedException {
+        getIpAdress("192", SettingsInstrumentationRunner.apName);
+    }
+
+    public void getIpAdress(String startIP, String mApName) throws InterruptedException {
+        int mIp = 0;
+        int mIndex = 0;
+
+        // enable WifiManager
+        WifiManager wfMgr = (WifiManager) mContext
+                .getSystemService(Context.WIFI_SERVICE);
+        wfMgr.setWifiEnabled(true);
+        mIndex = 0;
+        while (!wfMgr.isWifiEnabled() && (mIndex < WIFI_ENABLE_TIMEOUT)) {
+            mIndex++;
+            Thread.sleep(WAIT_FOR_WIFI_OPERATION);
+        }
+
+        // set access point and connect to it
+        boolean mAvailable1 = false;
+        WifiConfiguration wfc = new WifiConfiguration();
+        wfc.SSID = "\"".concat(mApName).concat("\"");
+        wfc.priority = 1;
+        wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+        wfc.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        wfc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        wfc.status = WifiConfiguration.Status.ENABLED;
+
+        Log.d(TAG, "New Wi-Fi Connection " + wfc.toString());
+
+        int networkId = wfMgr.addNetwork(wfc);
+
+        Log.d(TAG, "NetworkId= " + networkId);
+        wfMgr.enableNetwork(networkId, true);
+        wfMgr.reconnect();
+        Thread.sleep(WAIT_FOR_HTTP_CHECK);
+        wfMgr.saveConfiguration();
+        boolean mFound = false;
+        do {
+            mIp = wfMgr.getConnectionInfo().getIpAddress();
+            Log.d(TAG,
+                    "Trying to get IP "
+                            + String.format("%d.%d.%d.%d", (mIp & 0xff),
+                                    (mIp >> 8 & 0xff), (mIp >> 16 & 0xff),
+                                    (mIp >> 24 & 0xff)));
+            String s = (mIp & 0xff) + "";
+            if (startIP.equals(s))
+                mFound = true;
+            Thread.sleep(WAIT_FOR_WIFI_OPERATION);
+        } while ((mFound == false) && (mIndex < WIFI_ENABLE_TIMEOUT));
+        assertTrue("The new mIp did not match with the desired one " + mFound
+                + " " + (mIp & 0xff), mFound);
+    }
 }

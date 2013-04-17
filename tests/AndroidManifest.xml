@@ -63,4 +63,8 @@
         android:label="Settings Test Cases">
     </instrumentation>
 
+     <instrumentation android:name="com.android.settings.tests.SettingsInstrumentationRunner"
+        android:targetPackage="com.android.settings"
+        android:label="Settings Test Cases">
+    </instrumentation>
 </manifest>
