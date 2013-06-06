@@ -220,14 +220,18 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         mActivity.getWindow().getCurrentFocus().performClick();
     }
 
-    public void connectToWiFi(Properties wifiProps) throws IOException,
+    public void connectToWiFi(String apName, String apSecurity,
+            String apPassword, String apTestPage) throws IOException,
             InterruptedException {
         Log.v(TAG, "Instrumentation test start");
 
-        String wifiApNamne = wifiProps.getProperty("WIFI_AP_NAME");
-        String wifiApSecurity = wifiProps.getProperty("WIFI_AP_SECURITY");
-        String wifiApPass = wifiProps.getProperty("WIFI_AP_PASSWORD");
-        String wifiTestPage = wifiProps.getProperty("HTTP_TEST_PAGE");
+        String wifiApNamne = apName;
+        String wifiApSecurity = apSecurity;
+        String wifiApPass = apPassword;
+        String wifiTestPage = apTestPage;
+
+        Log.d(TAG, " " + apName + " " + apSecurity + " " + apPassword + " "
+                + apTestPage);
 
         mActivity = getActivity();
 
@@ -407,12 +411,11 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
     }
 
     public void testConnectToWifi() throws IOException, InterruptedException {
-        Log.v(TAG, "starting connection test");
-        Properties wifiProps = mTestConfigurationManager
-                .getProperties(CONFIG_DIR_PATH);
-        assertNotNull(TAG + " could not load config properties", wifiProps);
-        Log.v(TAG, "Wifi Properties loaded");
-        connectToWiFi(wifiProps);
+        Log.v(TAG, "Starting connection test");
+        connectToWiFi(SettingsInstrumentationRunner.apName,
+                SettingsInstrumentationRunner.apSecurity,
+                SettingsInstrumentationRunner.apPassword,
+                SettingsInstrumentationRunner.apTestPage);
     }
 
     public void testIpClassesA() throws InterruptedException {
@@ -427,7 +430,8 @@ public class WifiRouterTests extends ActivityInstrumentationTestCase2<Settings> 
         getIpAdress("192", SettingsInstrumentationRunner.apName);
     }
 
-    public void getIpAdress(String startIP, String mApName) throws InterruptedException {
+    public void getIpAdress(String startIP, String mApName)
+            throws InterruptedException {
         int mIp = 0;
         int mIndex = 0;
 

@@ -23,6 +23,9 @@ import android.test.InstrumentationTestSuite;
 
 public class SettingsInstrumentationRunner extends InstrumentationTestRunner {
     public static String apName;
+    public static String apSecurity;
+    public static String apPassword;
+    public static String apTestPage;
 
     @Override
     public void onCreate(Bundle b) {
@@ -32,6 +35,23 @@ public class SettingsInstrumentationRunner extends InstrumentationTestRunner {
         tmp = b.getString("apName");
         if (tmp != null) {
             apName = new String(tmp);
-        }
+        } else
+            apName = null;
+        tmp = b.getString("apSecurity");
+        if (tmp != null) {
+            apSecurity = new String(tmp);
+        } else
+            apSecurity = null;
+        tmp = b.getString("apPassword");
+        if (tmp != null) {
+            apPassword = new String(tmp);
+        } else
+            apPassword = null;
+        tmp = b.getString("apTestPage");
+        if (tmp != null) {
+            apTestPage = new String(tmp);
+        } else
+            apTestPage = null;
+
     }
 }
