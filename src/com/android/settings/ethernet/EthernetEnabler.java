@@ -57,6 +57,9 @@ public class EthernetEnabler implements CompoundButton.OnCheckedChangeListener {
                         mSwitch.setEnabled(true);
                         break;
                     case DISCONNECTING:
+                        if (mSwitch.isChecked()) {
+                            mEthernetManager.reconnect();
+                        }
                         setSwitchChecked(true);
                         mSwitch.setEnabled(false);
                         break;
