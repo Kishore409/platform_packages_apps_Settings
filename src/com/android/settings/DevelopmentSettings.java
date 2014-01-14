@@ -39,6 +39,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IDebuggingManager;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -95,7 +96,7 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
     private static final String ENABLE_TERMINAL = "enable_terminal";
     private static final String KEEP_SCREEN_ON = "keep_screen_on";
     private static final String BT_HCI_SNOOP_LOG = "bt_hci_snoop_log";
-    private static final String ENABLE_OEM_UNLOCK = "oem_unlock_enable";
+        private static final String ENABLE_OEM_UNLOCK = "oem_unlock_enable";
     private static final String ALLOW_MOCK_LOCATION = "allow_mock_location";
     private static final String HDCP_CHECKING_KEY = "hdcp_checking";
     private static final String HDCP_CHECKING_PROPERTY = "persist.sys.hdcp_checking";
@@ -1543,9 +1544,9 @@ public class DevelopmentSettings extends SettingsPreferenceFragment
         } else if (dialog == mAdbKeysDialog) {
             if (which == DialogInterface.BUTTON_POSITIVE) {
                 try {
-                    IBinder b = ServiceManager.getService(Context.USB_SERVICE);
-                    IUsbManager service = IUsbManager.Stub.asInterface(b);
-                    service.clearUsbDebuggingKeys();
+                    IBinder b = ServiceManager.getService(Context.DEBUGGING_SERVICE);
+                    IDebuggingManager service = IDebuggingManager.Stub.asInterface(b);
+                    service.clearDebuggingKeys();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to clear adb keys", e);
                 }
