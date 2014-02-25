@@ -137,6 +137,12 @@
     <!-- Used for diagnostic info screens, precise translation isn't needed. Formats the SD card in the phone, meaning it will be erased and reformatted -->
     <string name="sdcard_format" product="default">Erase SD card</string>
 
+    <!-- Used for diagnostic info screens, precise translation isn't needed. Formats the USB storage, meaning it will be erased and reformatted -->
+    <string name="usb_format" product="default">Erase USB storage</string>
+
+    <!-- USB storage & phone storage settings item title that will result in the phone unmounting the USB storage. [CHAR LIMIT=80] -->
+    <string name="usb_format_summary" product="default">Erases all data on the USB storage, such as music and photos</string>
+
     <!-- choice for the font size spinner -->
     <string name="small_font">Small</string>
     <!-- choice for the font size spinner -->

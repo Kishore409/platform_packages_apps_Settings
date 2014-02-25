@@ -213,8 +213,13 @@ public class StorageVolumePreferenceCategory extends PreferenceCategory {
         final boolean allowFormat = mVolume != null;
         if (allowFormat) {
             mFormatPreference = new Preference(context);
-            mFormatPreference.setTitle(R.string.sd_format);
-            mFormatPreference.setSummary(R.string.sd_format_summary);
+            if (mVolumeDescription.contains("USB")) {
+                mFormatPreference.setTitle(R.string.usb_format);
+                mFormatPreference.setSummary(R.string.usb_format_summary);
+            } else {
+                mFormatPreference.setTitle(R.string.sd_format);
+                mFormatPreference.setSummary(R.string.sd_format_summary);
+            }
             addPreference(mFormatPreference);
         }
 
@@ -322,7 +327,11 @@ public class StorageVolumePreferenceCategory extends PreferenceCategory {
             }
         } else if (mFormatPreference != null) {
             mFormatPreference.setEnabled(true);
-            mFormatPreference.setSummary(mResources.getString(R.string.sd_format_summary));
+            if (mVolumeDescription.contains("USB")) {
+                mFormatPreference.setSummary(mResources.getString(R.string.usb_format_summary));
+            } else {
+                mFormatPreference.setSummary(mResources.getString(R.string.sd_format_summary));
+            }
         }
     }
 
